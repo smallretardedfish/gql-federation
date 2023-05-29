@@ -1,0 +1,35 @@
+schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@requires","@tag", "@extends", "@override", "@inaccessible"])
+{
+  query: Query
+}
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+
+type Encounter @key(fields: "id") {
+  id: ID!
+  status: String!
+  type: Coding!
+  period: Period!
+  patient: Patient!
+}
+
+type Patient @extends @key(fields: "id") {
+  id: ID!
+  encounters: [Encounter!]! @goField(forceResolver: true)
+}
+
+type Coding @shareable {
+  system: String
+  code: String
+  display: String
+}
+
+type Period {
+  start: String
+  end: String
+}
+
+type Query {
+  encounters:[Encounter!]!
+}

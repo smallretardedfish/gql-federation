@@ -1,0 +1,157 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Address
+  @join__type(graph: PATIENT)
+{
+  use: String
+  line: [String!]!
+  city: String
+  state: String
+  postalCode: String
+  country: String
+}
+
+type Coding
+  @join__type(graph: CONDITION)
+  @join__type(graph: ENCOUNTER)
+  @join__type(graph: MEDICATION)
+{
+  system: String
+  code: String
+  display: String
+}
+
+type Condition
+  @join__type(graph: CONDITION, key: "id")
+{
+  id: ID!
+  code: Coding!
+  category: Coding!
+  severity: Coding!
+  patient: Patient!
+}
+
+type Encounter
+  @join__type(graph: ENCOUNTER, key: "id")
+{
+  id: ID!
+  status: String!
+  type: Coding!
+  period: Period!
+  patient: Patient!
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  CONDITION @join__graph(name: "condition", url: "http://localhost:4001/query")
+  ENCOUNTER @join__graph(name: "encounter", url: "http://localhost:4002/query")
+  MEDICATION @join__graph(name: "medication", url: "http://localhost:4003/query")
+  PATIENT @join__graph(name: "patient", url: "http://localhost:4004/query")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Medication
+  @join__type(graph: MEDICATION, key: "id")
+{
+  id: ID!
+  code: Coding!
+  form: Coding!
+  manufacturer: Organization
+  patient: Patient
+}
+
+input MedicationsFilter
+  @join__type(graph: MEDICATION)
+{
+  limit: Int
+  offset: Int
+}
+
+type Name
+  @join__type(graph: PATIENT)
+{
+  use: String
+  family: String
+  given: [String!]!
+}
+
+type Organization
+  @join__type(graph: MEDICATION, key: "id", extension: true)
+{
+  id: ID!
+}
+
+type Patient
+  @join__type(graph: CONDITION, key: "id", extension: true)
+  @join__type(graph: ENCOUNTER, key: "id", extension: true)
+  @join__type(graph: MEDICATION, key: "id", extension: true)
+  @join__type(graph: PATIENT, key: "id")
+{
+  id: ID!
+  encounters: [Encounter!]! @join__field(graph: ENCOUNTER)
+  name: Name! @join__field(graph: PATIENT)
+  gender: String @join__field(graph: PATIENT)
+  birthDate: String @join__field(graph: PATIENT)
+  address: [Address!]! @join__field(graph: PATIENT)
+  telecom: [Telecom!]! @join__field(graph: PATIENT)
+}
+
+type Period
+  @join__type(graph: ENCOUNTER)
+{
+  start: String
+  end: String
+}
+
+type Query
+  @join__type(graph: CONDITION)
+  @join__type(graph: ENCOUNTER)
+  @join__type(graph: MEDICATION)
+  @join__type(graph: PATIENT)
+{
+  conditions(first: Int!): [Condition!] @join__field(graph: CONDITION)
+  encounters: [Encounter!]! @join__field(graph: ENCOUNTER)
+  medications(input: MedicationsFilter): [Medication!]! @join__field(graph: MEDICATION)
+  patient(id: ID!): Patient @join__field(graph: PATIENT)
+  patients: [Patient!]! @join__field(graph: PATIENT)
+}
+
+type Telecom
+  @join__type(graph: PATIENT)
+{
+  system: String
+  value: String
+}

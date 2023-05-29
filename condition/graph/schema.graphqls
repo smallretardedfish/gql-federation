@@ -1,0 +1,26 @@
+schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@requires","@tag", "@extends", "@override", "@inaccessible"])
+{
+  query: Query
+}
+
+type Condition @key(fields: "id") {
+  id: ID!
+  code: Coding!
+  category: Coding!
+  severity: Coding!
+  patient: Patient!
+}
+
+type Patient @extends @key(fields: "id") {
+  id: ID!
+}
+
+type Coding @shareable {
+  system: String
+  code: String
+  display: String
+}
+
+type Query {
+  conditions(first:Int!): [Condition!]
+}

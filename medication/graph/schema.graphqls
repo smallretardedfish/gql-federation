@@ -1,0 +1,35 @@
+schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@requires","@tag", "@extends", "@override", "@inaccessible"])
+{
+  query: Query
+}
+
+type Medication @key(fields: "id") {
+  id: ID!
+  code: Coding!
+  form: Coding!
+  manufacturer: Organization
+  patient: Patient
+}
+
+type Patient @extends @key(fields: "id"){
+  id: ID!
+}
+
+type Organization @extends @key(fields: "id"){
+  id: ID!
+}
+
+type Coding  @shareable {
+  system: String
+  code: String
+  display: String
+}
+
+input MedicationsFilter{
+  limit: Int
+  offset: Int
+}
+
+type Query {
+  medications(input:MedicationsFilter): [Medication!]!
+}

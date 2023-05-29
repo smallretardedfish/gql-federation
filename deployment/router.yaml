@@ -1,0 +1,6 @@
+include_subgraph_errors:
+    all: true
+supergraph:
+    # The socket address and port to listen on
+    listen: 0.0.0.0:4000
+    introspection: true

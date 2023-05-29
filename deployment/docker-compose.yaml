@@ -1,0 +1,196 @@
+version: '3.8'
+
+networks:
+  federation-services-net:
+    driver: bridge
+
+volumes:
+  patient-service-postgres:
+  medication-service-postgres:
+  encounter-service-postgres:
+  condition-service-postgres:
+
+services:
+  patient-service:
+    build: ../patient
+    container_name: patient-service
+    restart: always
+    depends_on:
+      - patient-service-postgres
+      - patient-migrations
+    ports:
+      - "4004:4004"
+    env_file:
+      - ./patient.env
+    networks:
+      - federation-services-net
+
+  patient-service-postgres:
+    image: postgres:14
+    container_name: patient-postgres
+    restart: always
+    ports:
+      - "3004:5432"
+    volumes:
+      -  patient-service-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: patient-service
+    networks:
+      - federation-services-net
+
+  patient-migrations:
+    image: migrate/migrate
+    container_name: patient-migrations
+    restart: on-failure
+    depends_on:
+      - patient-service-postgres
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - ../patient/migrations:/migrations
+    entrypoint: [ ]
+    command: /wait-for-it.sh patient-service-postgres:5432 -- migrate -path=/migrations/ -database postgresql://postgres:postgres@patient-service-postgres:5432/patient-service?sslmode=disable up
+    networks:
+      - federation-services-net
+
+  medication-service:
+    build: ../medication
+    container_name: medication-service
+    restart: always
+    depends_on:
+      - medication-service-postgres
+      - medication-migrations
+    ports:
+      - "4003:4003"
+    env_file:
+      - ./medication.env
+    networks:
+      - federation-services-net
+
+  medication-service-postgres:
+    image: postgres:14
+    container_name: medication-postgres
+    restart: always
+    ports:
+      - "3003:5432"
+    volumes:
+      - medication-service-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: medication-service
+    networks:
+      - federation-services-net
+
+  medication-migrations:
+    image: migrate/migrate
+    container_name: medication-migrations
+    restart: on-failure
+    depends_on:
+      - medication-service-postgres
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - ../medication/migrations:/migrations
+    entrypoint: [ ]
+    command: /wait-for-it.sh medication-service-postgres:5432 -- migrate -path=/migrations/ -database postgresql://postgres:postgres@medication-service-postgres:5432/medication-service?sslmode=disable up
+    networks:
+      - federation-services-net
+  encounter-service:
+    build: ../encounter
+    container_name: encounter-service
+    restart: always
+    depends_on:
+      - encounter-service-postgres
+      - encounter-migrations
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./encounter.env
+    networks:
+      - federation-services-net
+
+  encounter-service-postgres:
+    image: postgres:14
+    container_name: encounter-postgres
+    restart: always
+    ports:
+      - "3002:5432"
+    volumes:
+      - encounter-service-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: encounter-service
+    networks:
+      - federation-services-net
+
+  encounter-migrations:
+    image: migrate/migrate
+    container_name: encounter-migrations
+    restart: on-failure
+    depends_on:
+      - encounter-service-postgres
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - ../encounter/migrations:/migrations
+    entrypoint: [ ]
+    command: /wait-for-it.sh encounter-service-postgres:5432 -- migrate -path=/migrations/ -database postgresql://postgres:postgres@encounter-service-postgres:5432/encounter-service?sslmode=disable up
+    networks:
+      - federation-services-net
+  condition-service:
+    build: ../condition
+    container_name: condition-service
+    restart: always
+    depends_on:
+      - condition-service-postgres
+      - condition-migrations
+    ports:
+      - "4001:8084"
+    env_file:
+      - ./condition.env
+    networks:
+      - federation-services-net
+
+  condition-service-postgres:
+    image: postgres:14
+    container_name: condition-postgres
+    restart: always
+    ports:
+      - "3001:5432"
+    volumes:
+      - condition-service-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: condition-service
+    networks:
+      - federation-services-net
+
+  condition-migrations:
+    image: migrate/migrate
+    container_name: condition-migrations
+    restart: on-failure
+    depends_on:
+      - condition-service-postgres
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - ../condition/migrations:/migrations
+    entrypoint: [ ]
+    command: /wait-for-it.sh condition-service-postgres:5432 -- migrate -path=/migrations/ -database postgresql://postgres:postgres@condition-service-postgres:5432/condition-service?sslmode=disable up
+    networks:
+      - federation-services-net
+
+  router:
+      container_name: router
+      image: ghcr.io/apollographql/router:v1.19.0
+      volumes:
+        -  ./supergraph.graphql:/dist/schema/supergraph.graphql
+        - ./router.yaml:/dist/config/router.yaml
+      ports:
+        - "4000:4000"
+        - "8088:8088"
+      environment:
+        APOLLO_ROUTER_SUPERGRAPH_PATH: /dist/schema/supergraph.graphql
+      networks:
+        - federation-services-net

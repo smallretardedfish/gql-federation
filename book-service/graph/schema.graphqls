@@ -1,0 +1,33 @@
+schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@requires","@tag", "@extends", "@override", "@inaccessible"])
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Book @key(fields:"id") {
+  id: ID!
+  title: String!
+  year: Int!
+  author: Author!
+}
+
+type Author @extends @key(fields: "id") {
+  id: ID!
+  books :[Book!] @goField(forceResolver: true)
+}
+
+type Query {
+  books: [Book!]!
+}
+
+input NewBook {
+  title: String!
+  year: Int!
+  authorId: String!
+}
+
+type Mutation {
+  createBook(input: NewBook): Book!
+}

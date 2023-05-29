@@ -1,0 +1,39 @@
+schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@requires","@tag", "@extends", "@override", "@inaccessible"])
+{
+  query: Query
+}
+
+
+type Patient @key(fields: "id") {
+  id: ID!
+  name: Name!
+  gender: String
+  birthDate: String
+  address: [Address!]!
+  telecom: [Telecom!]!
+}
+
+type Name {
+  use: String
+  family: String
+  given: [String!]!
+}
+
+type Address {
+  use: String
+  line: [String!]!
+  city: String
+  state: String
+  postalCode: String
+  country: String
+}
+
+type Telecom {
+  system: String
+  value: String
+}
+
+type Query {
+  patient(id :ID!): Patient
+  patients: [Patient!]!
+}
