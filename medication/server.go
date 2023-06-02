@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/smallretardedfish/gql-federation/medication/faker"
 	"github.com/smallretardedfish/gql-federation/medication/storage"
+	"github.com/smallretardedfish/gql-federation/medication/transport/http_transport"
 	"golang.org/x/exp/slog"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/joho/godotenv"
-	"github.com/smallretardedfish/gql-federation/medication/graph"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph"
 
 	"database/sql"
 	_ "github.com/lib/pq"
@@ -33,6 +34,10 @@ func main() {
 	dbConnString := os.Getenv("POSTGRES_URI")
 	if dbConnString == "" {
 		dbConnString = defaultDbConnString
+	}
+	patientServiceHost := os.Getenv("PATIENT_SERVICE")
+	if patientServiceHost == "" {
+		patientServiceHost = "localhost:4004"
 	}
 
 	dbClient, err := NewPostgresClient(dbConnString)
@@ -58,6 +63,7 @@ func main() {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
+	http.Handle("/medications", http_transport.GetMedications(medicationPostgresStore, patientServiceHost))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Printf("db connection string: %s", dbConnString)

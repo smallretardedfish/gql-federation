@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/smallretardedfish/gql-federation/medication/graph/model"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph/model"
 )
 
 // FindMedicationByID is the resolver for the findMedicationByID field.

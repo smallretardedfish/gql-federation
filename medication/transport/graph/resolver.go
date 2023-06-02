@@ -2,7 +2,7 @@ package graph
 
 import (
 	"context"
-	"github.com/smallretardedfish/gql-federation/medication/graph/model"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph/model"
 )
 
 // This file will not be regenerated automatically.

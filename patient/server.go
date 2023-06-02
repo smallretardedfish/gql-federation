@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/smallretardedfish/gql-federation/patient/dataloaders"
 	"github.com/smallretardedfish/gql-federation/patient/faker"
+	"github.com/smallretardedfish/gql-federation/patient/http_transport"
 	"github.com/smallretardedfish/gql-federation/patient/storage"
 	"golang.org/x/exp/slog"
 	"log"
@@ -66,6 +67,7 @@ func main() {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", dataloaders.Middleware(loaders, srv))
+	http.Handle("/patients", http_transport.GetPatient(patientPostgresStore))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

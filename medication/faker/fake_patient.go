@@ -2,8 +2,8 @@ package faker
 
 import (
 	"context"
-	"github.com/smallretardedfish/gql-federation/medication/graph"
-	"github.com/smallretardedfish/gql-federation/medication/graph/model"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph/model"
 	"math/rand"
 )
 

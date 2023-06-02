@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/smallretardedfish/gql-federation/medication/graph/model"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph/model"
 )
 
 // Medications is the resolver for the medications field.

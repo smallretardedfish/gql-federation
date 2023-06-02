@@ -3,7 +3,7 @@ package storage
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"github.com/smallretardedfish/gql-federation/medication/graph/model"
+	"github.com/smallretardedfish/gql-federation/medication/transport/graph/model"
 )
 
 type CodingPG model.Coding

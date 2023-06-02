@@ -63,8 +63,8 @@ type Encounter
 scalar join__FieldSet
 
 enum join__Graph {
-  CONDITION @join__graph(name: "condition", url: "http://localhost:4001/query")
-  ENCOUNTER @join__graph(name: "encounter", url: "http://localhost:4002/query")
+  CONDITION @join__graph(name: "condition", url: "http://condition-service:4001/query")
+  ENCOUNTER @join__graph(name: "encounter", url: "http://encounter-service:4002/query")
   MEDICATION @join__graph(name: "medication", url: "http://medication-service:4003/query")
   PATIENT @join__graph(name: "patient", url: "http://patient-service:4004/query")
 }

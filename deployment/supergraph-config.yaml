@@ -1,11 +1,11 @@
 federation_version: =2.3.2
 subgraphs:
     condition:
-        routing_url: http://localhost:4001/query
+        routing_url: http://condition-service:4001/query
         schema:
            file: ../condition/graph/schema.graphqls
     encounter:
-        routing_url: http://localhost:4002/query
+        routing_url: http://encounter-service:4002/query
         schema:
             file: ../encounter/graph/schema.graphqls
     medication:
